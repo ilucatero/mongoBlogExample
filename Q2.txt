@@ -1,0 +1,16 @@
+db.messages.aggregate([
+	{$unwind:"$headers.To"},
+	{$group:{
+		_id : {id:"$_id", _from:"$headers.From"}, 
+		_to : {$addToSet:"$headers.To"} 
+		}
+	},
+	{$unwind:"$_to"},
+	{$group:{
+			_id : {sender:"$_id._from", recipient:"$_to"},
+			mails_sent:{$sum:1}
+		}
+	},
+	{$sort:{"mails_sent":-1}}
+], 
+{allowDiskUse:true})
